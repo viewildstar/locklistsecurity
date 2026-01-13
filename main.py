@@ -1,9 +1,10 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from api.m365_routes import router as m365_router
+from api.routes import router
 from core.database import init_db
-from pathlib import Path
 
 app = FastAPI(
     title="LockList Security",
@@ -16,9 +17,8 @@ app = FastAPI(
 def _startup():
     init_db()
 
-app.include_router(m365_router, prefix="/api/v1")
+app.include_router(router)
 
-# Serve a simple dashboard if present
-frontend_dir = Path(__file__).parent / "frontend"
-if frontend_dir.exists():
-    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+# Serve the frontend from /
+frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
+app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
