@@ -1,10 +1,8 @@
 name: CI
-on:
-  push:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
-  smoke:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,4 +11,4 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt
-      - run: python -m compileall -q .
+      - run: python -c "import main; print('import ok')"
