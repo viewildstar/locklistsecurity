@@ -3,24 +3,222 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LockList Security</title>
+  <title>LockList Security – M365 One-time Scan</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 40px; line-height: 1.4; }
-    code, pre { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; }
-    .card { border: 1px solid #e6e6e6; border-radius: 12px; padding: 16px; max-width: 720px; }
-    a { text-decoration: none; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 28px; }
+    .row { margin: 10px 0; }
+    button { padding: 10px 12px; cursor: pointer; }
+    .muted { color: #666; }
+    .bad { font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px; max-width: 900px; }
+    table { border-collapse: collapse; width: 100%; max-width: 1100px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 13px; vertical-align: top; }
+    th { text-align: left; background: #f7f7f7; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid #ccc; font-size: 12px; }
   </style>
+  <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
 </head>
 <body>
   <h1>LockList Security</h1>
-  <div class="card">
-    <p>This is a minimal placeholder UI. Your real M365 dashboard will live here.</p>
-    <ul>
-      <li><a href="/api/v1/health">API health</a></li>
-      <li><a href="/api/v1/tenants">List tenants (DB test)</a></li>
-      <li><a href="/api/v1/docs">Swagger docs</a></li>
-    </ul>
-    <p><strong>Next:</strong> Add your Graph client, checks, scan engine, and report routes.</p>
+  <p class="muted">One-time Microsoft 365 security checkup. Sign in, run scan, download evidence.</p>
+
+  <div class="row">
+    <button id="btnSignIn">Sign in to Microsoft 365</button>
+    <button id="btnSignOut" disabled>Sign out</button>
+    <button id="btnScan" disabled>Run one-time scan</button>
   </div>
+
+  <div class="row grid">
+    <div class="muted">Signed in:</div><div id="signedIn" class="muted">No</div>
+    <div class="muted">Account:</div><div id="account" class="muted">–</div>
+    <div class="muted">Status:</div><div id="status" class="muted">Idle</div>
+  </div>
+
+  <div class="row" id="downloads" style="display:none;">
+    <h3>Downloads</h3>
+    <ul>
+      <li><a id="dlPdf" href="#">PDF report</a></li>
+      <li><a id="dlCsv" href="#">CSV results</a></li>
+      <li><a id="dlJsonl" href="#">JSONL evidence</a></li>
+    </ul>
+  </div>
+
+  <div class="row">
+    <h3>Results</h3>
+    <table id="resultsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Check</th>
+          <th>Status</th>
+          <th>Severity</th>
+          <th>Summary</th>
+          <th>How to fix</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    let msalApp;
+    let config;
+
+    const elSignedIn = document.getElementById('signedIn');
+    const elAccount = document.getElementById('account');
+    const elStatus = document.getElementById('status');
+    const btnSignIn = document.getElementById('btnSignIn');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const btnScan = document.getElementById('btnScan');
+
+    function setStatus(msg) {
+      elStatus.textContent = msg;
+    }
+
+    async function loadConfig() {
+      const r = await fetch('/api/v1/public-config');
+      config = await r.json();
+      if (!config.clientId) {
+        setStatus('Missing AZURE_CLIENT_ID on server. Set it in .env and restart.');
+        btnSignIn.disabled = true;
+        return;
+      }
+
+      msalApp = new msal.PublicClientApplication({
+        auth: {
+          clientId: config.clientId,
+          authority: config.authority,
+          redirectUri: window.location.origin + '/',
+        },
+        cache: {
+          cacheLocation: 'localStorage'
+        }
+      });
+
+      const accounts = msalApp.getAllAccounts();
+      if (accounts.length) {
+        msalApp.setActiveAccount(accounts[0]);
+        refreshUI();
+      }
+    }
+
+    function refreshUI() {
+      const acct = msalApp?.getActiveAccount();
+      const signedIn = !!acct;
+      elSignedIn.textContent = signedIn ? 'Yes' : 'No';
+      elAccount.textContent = signedIn ? (acct.username || acct.homeAccountId) : '–';
+      btnSignOut.disabled = !signedIn;
+      btnScan.disabled = !signedIn;
+      btnSignIn.disabled = signedIn;
+    }
+
+    async function signIn() {
+      setStatus('Signing in...');
+      const loginRequest = {
+        scopes: config.scopes,
+        prompt: 'select_account'
+      };
+      const resp = await msalApp.loginPopup(loginRequest);
+      msalApp.setActiveAccount(resp.account);
+      refreshUI();
+      setStatus('Signed in.');
+    }
+
+    async function signOut() {
+      const acct = msalApp.getActiveAccount();
+      if (!acct) return;
+      await msalApp.logoutPopup({ account: acct });
+      refreshUI();
+      setStatus('Signed out.');
+    }
+
+    async function acquireToken() {
+      const acct = msalApp.getActiveAccount();
+      if (!acct) throw new Error('Not signed in');
+
+      try {
+        const resp = await msalApp.acquireTokenSilent({ account: acct, scopes: config.scopes });
+        return resp.accessToken;
+      } catch (e) {
+        const resp = await msalApp.acquireTokenPopup({ account: acct, scopes: config.scopes });
+        return resp.accessToken;
+      }
+    }
+
+    function showResults(data) {
+      const table = document.getElementById('resultsTable');
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      // Sort: fail first, then severity
+      const order = { fail: 0, error: 1, not_detected: 2, pass: 3 };
+      const sev = { high: 0, medium: 1, low: 2 };
+
+      const rows = (data.results || []).slice().sort((a,b) => {
+        return (order[a.status] ?? 9) - (order[b.status] ?? 9) || (sev[a.severity] ?? 9) - (sev[b.severity] ?? 9);
+      });
+
+      for (const r of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(r.category)}</td>
+          <td>${escapeHtml(r.title)}</td>
+          <td><span class="pill ${r.status !== 'pass' ? 'bad' : ''}">${escapeHtml(r.status)}</span></td>
+          <td><span class="pill">${escapeHtml(r.severity)}</span></td>
+          <td>${escapeHtml(r.summary)}</td>
+          <td>${escapeHtml(r.remediation)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      table.style.display = '';
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    async function runScan() {
+      setStatus('Getting token...');
+      const token = await acquireToken();
+
+      setStatus('Running scan (this can take a minute)...');
+      const r = await fetch('/api/v1/scan-once', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!r.ok) {
+        const t = await r.text();
+        setStatus('Scan failed: ' + t);
+        return;
+      }
+
+      const resp = await r.json();
+      const scanId = resp.scan_run_id;
+
+      // Fetch full results
+      const r2 = await fetch('/api/v1/scan-runs/' + scanId);
+      const data = await r2.json();
+      showResults(data);
+
+      // Downloads
+      document.getElementById('downloads').style.display = '';
+      document.getElementById('dlPdf').href = resp.reports.pdf;
+      document.getElementById('dlCsv').href = resp.reports.csv;
+      document.getElementById('dlJsonl').href = resp.reports.jsonl;
+
+      setStatus('Done.');
+    }
+
+    btnSignIn.addEventListener('click', () => signIn().catch(e => setStatus('Sign-in error: ' + e)));
+    btnSignOut.addEventListener('click', () => signOut().catch(e => setStatus('Sign-out error: ' + e)));
+    btnScan.addEventListener('click', () => runScan().catch(e => setStatus('Scan error: ' + e)));
+
+    loadConfig().catch(e => setStatus('Config error: ' + e));
+  </script>
 </body>
 </html>
