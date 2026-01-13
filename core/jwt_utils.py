@@ -100,3 +100,54 @@ async def verify_graph_access_token(token: str) -> Dict[str, Any]:
 
     except (JWTError, httpx.HTTPError) as e:
         raise ValueError(f"Invalid token: {e}")
+
+async def verify_access_token(token: str, expected_audience: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Verify an Azure AD access token used by this service.
+
+    Accepts Microsoft Graph access tokens by default. If `expected_audience` is provided,
+    it will be accepted in addition to the standard Graph audiences.
+    """
+    audiences = set(GRAPH_AUDIENCES)
+    if expected_audience:
+        audiences.add(expected_audience)
+
+    try:
+        header = jwt.get_unverified_header(token)
+        kid = header.get("kid")
+        if not kid:
+            raise ValueError("Token missing kid")
+
+        jwks = await _get_jwks()
+        jwk = _find_jwk(jwks, kid)
+
+        claims = jwt.decode(
+            token,
+            jwk,
+            algorithms=["RS256"],
+            audience=list(audiences),
+            options={
+                "verify_aud": True,
+                "verify_exp": True,
+                "verify_nbf": True,
+                "verify_iss": False,
+            },
+        )
+
+        tid = claims.get("tid")
+        iss = claims.get("iss")
+        if not tid or not iss:
+            raise ValueError("Token missing tid/iss")
+
+        valid_issuers = {
+            f"https://login.microsoftonline.com/{tid}/v2.0",
+            f"https://sts.windows.net/{tid}/",
+        }
+        if iss not in valid_issuers:
+            raise ValueError(f"Invalid issuer: {iss}")
+
+        return claims
+
+    except (JWTError, httpx.HTTPError) as e:
+        raise ValueError(f"Invalid token: {e}")
+
