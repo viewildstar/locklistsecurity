@@ -23,7 +23,7 @@
   <p class="muted">One-time Microsoft 365 security checkup. Sign in, run scan, download evidence.</p>
 
   <div class="row">
-    <button id="btnSignIn">Sign in to Microsoft 365</button>
+    <button id="btnSignIn" disabled>Sign in to Microsoft 365</button>
     <button id="btnSignOut" disabled>Sign out</button>
     <button id="btnScan" disabled>Run one-time scan</button>
   </div>
@@ -76,29 +76,46 @@
     }
 
     async function loadConfig() {
-      const r = await fetch('/api/v1/public-config');
-      config = await r.json();
-      if (!config.clientId) {
-        setStatus('Missing AZURE_CLIENT_ID on server. Set it in .env and restart.');
-        btnSignIn.disabled = true;
-        return;
-      }
-
-      msalApp = new msal.PublicClientApplication({
-        auth: {
-          clientId: config.clientId,
-          authority: config.authority,
-          redirectUri: window.location.origin + '/',
-        },
-        cache: {
-          cacheLocation: 'localStorage'
+      try {
+        const r = await fetch('/api/v1/public-config');
+        if (!r.ok) {
+          throw new Error(`Failed to load config: ${r.status} ${r.statusText}`);
         }
-      });
+        config = await r.json();
+        if (!config || !config.clientId) {
+          setStatus('Missing AZURE_CLIENT_ID on server. Set it in .env and restart.');
+          btnSignIn.disabled = true;
+          return;
+        }
+        if (!config.scopes || !Array.isArray(config.scopes) || config.scopes.length === 0) {
+          setStatus('Invalid config: scopes are missing or empty.');
+          btnSignIn.disabled = true;
+          return;
+        }
 
-      const accounts = msalApp.getAllAccounts();
-      if (accounts.length) {
-        msalApp.setActiveAccount(accounts[0]);
-        refreshUI();
+        msalApp = new msal.PublicClientApplication({
+          auth: {
+            clientId: config.clientId,
+            authority: config.authority,
+            redirectUri: window.location.origin + '/',
+          },
+          cache: {
+            cacheLocation: 'localStorage'
+          }
+        });
+
+        const accounts = msalApp.getAllAccounts();
+        if (accounts.length) {
+          msalApp.setActiveAccount(accounts[0]);
+          refreshUI();
+        } else {
+          // Enable sign-in button after config is loaded
+          btnSignIn.disabled = false;
+        }
+      } catch (e) {
+        setStatus('Config error: ' + e.message);
+        btnSignIn.disabled = true;
+        throw e;
       }
     }
 
@@ -113,15 +130,28 @@
     }
 
     async function signIn() {
+      if (!config || !config.scopes) {
+        setStatus('Error: Config not loaded. Please refresh the page.');
+        return;
+      }
+      if (!msalApp) {
+        setStatus('Error: MSAL not initialized. Please refresh the page.');
+        return;
+      }
       setStatus('Signing in...');
-      const loginRequest = {
-        scopes: config.scopes,
-        prompt: 'select_account'
-      };
-      const resp = await msalApp.loginPopup(loginRequest);
-      msalApp.setActiveAccount(resp.account);
-      refreshUI();
-      setStatus('Signed in.');
+      try {
+        const loginRequest = {
+          scopes: config.scopes,
+          prompt: 'select_account'
+        };
+        const resp = await msalApp.loginPopup(loginRequest);
+        msalApp.setActiveAccount(resp.account);
+        refreshUI();
+        setStatus('Signed in.');
+      } catch (e) {
+        setStatus('Sign-in error: ' + e.message);
+        throw e;
+      }
     }
 
     async function signOut() {
@@ -133,6 +163,9 @@
     }
 
     async function acquireToken() {
+      if (!config || !config.scopes) {
+        throw new Error('Config not loaded');
+      }
       const acct = msalApp.getActiveAccount();
       if (!acct) throw new Error('Not signed in');
 
