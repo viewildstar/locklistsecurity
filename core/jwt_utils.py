@@ -69,3 +69,9 @@ async def verify_access_token(access_token: str) -> Dict[str, Any]:
     """
     Verifies:
       - JWT signature using tenant-matched Microsoft JWKS (kid-matched)
+
+    NOTE:
+    This is a temporary stub to avoid syntax errors.
+    Implement full verification logic later.
+    """
+    raise NotImplementedError("verify_access_token is not implemented yet")
