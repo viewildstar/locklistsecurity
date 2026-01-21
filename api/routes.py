@@ -55,7 +55,7 @@ async def scan_once(
     client_id = os.getenv("AZURE_CLIENT_ID", "")
     if client_id:
         try:
-            claims = verify_access_token(token)
+            claims = await verify_access_token(token)
         except Exception as e:
             raise HTTPException(status_code=401, detail=str(e))
     else:
