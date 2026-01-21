@@ -38,6 +38,7 @@ def microsoft_identity_association():
     )
 
 
-# Serve the frontend from /
+# Serve the frontend from / (only if directory exists)
 frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+if os.path.exists(frontend_dir) and os.path.isdir(frontend_dir):
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
