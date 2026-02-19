@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: locklistsecurity
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: AZURE_CLIENT_ID
+        sync: false
+      - key: AZURE_AUTHORITY
+        value: https://login.microsoftonline.com/organizations
+      - key: DATABASE_URL
+        value: sqlite:///./prod.db
+    healthCheckPath: /api/v1/health
+
