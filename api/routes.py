@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import base64
 import os
+import pathlib
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import Response
@@ -11,7 +11,14 @@ from core.database import get_db
 from core.jwt_utils import extract_bearer_token, verify_access_token
 from core.scan import run_scan_once
 from core.models import ScanRun, CheckResult, Tenant
-from core.reports import generate_csv_results, generate_jsonl_evidence, generate_pdf_report
+from core.reports import (
+    generate_csv_results,
+    generate_jsonl_evidence,
+    generate_pdf_report,
+)
+
+# HARD PROOF LOG (cannot be swallowed)
+LOG_FILE = pathlib.Path("HIT_LOG.txt")
 
 router = APIRouter(prefix="/api/v1", tags=["m365"])
 
@@ -19,9 +26,12 @@ router = APIRouter(prefix="/api/v1", tags=["m365"])
 @router.get("/public-config")
 def public_config():
     client_id = os.getenv("AZURE_CLIENT_ID", "")
-    authority = os.getenv("AZURE_AUTHORITY", "https://login.microsoftonline.com/organizations")
+    authority = os.getenv(
+        "AZURE_AUTHORITY",
+        "https://login.microsoftonline.com/organizations",
+    )
+
     if not client_id:
-        # Don't hard-fail the frontend, but make it obvious
         return {"clientId": "", "authority": authority, "scopes": []}
 
     scopes = [
@@ -35,6 +45,7 @@ def public_config():
         "profile",
         "email",
     ]
+
     return {"clientId": client_id, "authority": authority, "scopes": scopes}
 
 
@@ -48,6 +59,9 @@ async def scan_once(
     db: Session = Depends(get_db),
     authorization: str | None = Header(default=None),
 ):
+    # ABSOLUTE PROOF THIS FUNCTION RAN
+    LOG_FILE.write_text("SCAN_ONCE WAS HIT\n")
+
     token = extract_bearer_token(authorization)
     if not token:
         raise HTTPException(status_code=401, detail="Missing Bearer token")
@@ -62,6 +76,10 @@ async def scan_once(
         claims = {}
 
     sr = run_scan_once(db=db, access_token=token)
+
+    # FORCE VISIBILITY OF INTERNAL FAILURE
+    if sr.status == "error":
+        raise RuntimeError(f"Scan failed internally: {sr.error}")
 
     return {
         "scan_run_id": sr.id,
@@ -85,8 +103,14 @@ def get_scan(scan_run_id: int, db: Session = Depends(get_db)):
     sr = db.query(ScanRun).filter(ScanRun.id == scan_run_id).first()
     if not sr:
         raise HTTPException(status_code=404, detail="Scan run not found")
+
     tenant = db.query(Tenant).filter(Tenant.id == sr.tenant_id).first()
-    results = db.query(CheckResult).filter(CheckResult.scan_run_id == scan_run_id).all()
+    results = (
+        db.query(CheckResult)
+        .filter(CheckResult.scan_run_id == scan_run_id)
+        .all()
+    )
+
     return {
         "scan_run": {
             "id": sr.id,
@@ -120,7 +144,9 @@ def download_jsonl(scan_run_id: int, db: Session = Depends(get_db)):
     return Response(
         content=data,
         media_type="application/jsonl",
-        headers={"Content-Disposition": f"attachment; filename=evidence_{scan_run_id}.jsonl"},
+        headers={
+            "Content-Disposition": f"attachment; filename=evidence_{scan_run_id}.jsonl"
+        },
     )
 
 
@@ -130,7 +156,9 @@ def download_csv(scan_run_id: int, db: Session = Depends(get_db)):
     return Response(
         content=data,
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=results_{scan_run_id}.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename=results_{scan_run_id}.csv"
+        },
     )
 
 
@@ -140,5 +168,7 @@ def download_pdf(scan_run_id: int, db: Session = Depends(get_db)):
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=report_{scan_run_id}.pdf"},
+        headers={
+            "Content-Disposition": f"attachment; filename=report_{scan_run_id}.pdf"
+        },
     )

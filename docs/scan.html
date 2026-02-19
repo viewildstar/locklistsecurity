@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Run Scan — LockList Security</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+  <style>
+    :root {
+      --bg: #070b14;
+      --bg-elevated: #0d1321;
+      --bg-card: #121a2d;
+      --border: rgba(255,255,255,0.06);
+      --text: #e8ecf4;
+      --text-muted: #8b95a8;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59, 130, 246, 0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --fail: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Nav */
+    nav {
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    nav .logo { font-weight: 700; font-size: 1.1rem; text-decoration: none; color: var(--text); }
+    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+    nav a:hover { color: var(--text); }
+
+    /* Main */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    h1 { font-size: 1.75rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .sub { color: var(--text-muted); margin-bottom: 2rem; }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost { background: transparent; color: var(--text-muted); }
+
+    /* Status grid */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0.5rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .status-grid .label { color: var(--text-muted); }
+    .status-grid .value { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+    /* Downloads */
+    .downloads {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .downloads h3 { font-size: 1rem; margin-bottom: 1rem; }
+    .downloads ul { list-style: none; }
+    .downloads li { margin-bottom: 0.5rem; }
+    .downloads a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .downloads a:hover { text-decoration: underline; }
+
+    /* Results table */
+    .results-section { display: none; margin-top: 2rem; }
+    .results-section h3 { font-size: 1.1rem; margin-bottom: 1rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .pill-pass { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .pill-fail { background: rgba(239, 68, 68, 0.2); color: var(--fail); }
+    .pill-not_detected { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .pill-error { background: rgba(239, 68, 68, 0.2); color: var(--fail); }
+    .pill-high { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .pill-medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .pill-low { background: rgba(59, 130, 246, 0.15); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo">LockList Security</a>
+    <a href="index.html">← Back</a>
+  </nav>
+
+  <main>
+    <h1>Security Scan</h1>
+    <p class="sub">One-time Microsoft 365 security assessment. Sign in with an admin account to run.</p>
+
+    <div class="actions">
+      <button id="btnSignIn" class="btn btn-primary" disabled>Sign in to Microsoft 365</button>
+      <button id="btnSignOut" class="btn btn-secondary" disabled>Sign out</button>
+      <button id="btnScan" class="btn btn-primary" disabled>Run scan</button>
+    </div>
+
+    <div class="status-grid">
+      <span class="label">Signed in</span><span id="signedIn" class="value">No</span>
+      <span class="label">Account</span><span id="account" class="value">–</span>
+      <span class="label">Status</span><span id="status" class="value">Idle</span>
+    </div>
+
+    <div class="downloads" id="downloads">
+      <h3>Downloads</h3>
+      <ul>
+        <li><a id="dlPdf" href="#">PDF report</a></li>
+        <li><a id="dlCsv" href="#">CSV results</a></li>
+        <li><a id="dlJsonl" href="#">JSONL evidence</a></li>
+      </ul>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <h3>Results</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Check</th>
+            <th>Status</th>
+            <th>Severity</th>
+            <th>Summary</th>
+            <th>Remediation</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    let msalApp;
+    let config;
+
+    const API_BASE =
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:8000'
+        : window.location.origin;
+
+    const elSignedIn = document.getElementById('signedIn');
+    const elAccount = document.getElementById('account');
+    const elStatus = document.getElementById('status');
+    const btnSignIn = document.getElementById('btnSignIn');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const btnScan = document.getElementById('btnScan');
+
+    function setStatus(msg) {
+      elStatus.textContent = msg;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    async function loadConfig() {
+      try {
+        setStatus('Loading...');
+        const r = await fetch(`${API_BASE}/api/v1/public-config`);
+        if (!r.ok) throw new Error(`Config failed: ${r.status}`);
+        config = await r.json();
+
+        if (!config.clientId || !config.scopes?.length) {
+          throw new Error('Invalid server config');
+        }
+
+        msalApp = new msal.PublicClientApplication({
+          auth: {
+            clientId: config.clientId,
+            authority: config.authority,
+            redirectUri: window.location.origin + (window.location.pathname || '/'),
+          },
+          cache: { cacheLocation: 'localStorage' }
+        });
+
+        const accounts = msalApp.getAllAccounts();
+        if (accounts.length) {
+          msalApp.setActiveAccount(accounts[0]);
+          refreshUI();
+        } else {
+          btnSignIn.disabled = false;
+        }
+        setStatus('Ready');
+      } catch (e) {
+        setStatus('Config error: ' + e.message);
+        btnSignIn.disabled = true;
+      }
+    }
+
+    function refreshUI() {
+      const acct = msalApp?.getActiveAccount();
+      const signedIn = !!acct;
+      elSignedIn.textContent = signedIn ? 'Yes' : 'No';
+      elAccount.textContent = signedIn ? (acct.username || acct.homeAccountId) : '–';
+      btnSignOut.disabled = !signedIn;
+      btnScan.disabled = !signedIn;
+      btnSignIn.disabled = signedIn;
+    }
+
+    async function signIn() {
+      setStatus('Signing in...');
+      const resp = await msalApp.loginPopup({
+        scopes: config.scopes,
+        prompt: 'select_account'
+      });
+      msalApp.setActiveAccount(resp.account);
+      refreshUI();
+      setStatus('Signed in');
+    }
+
+    async function signOut() {
+      const acct = msalApp.getActiveAccount();
+      if (!acct) return;
+      await msalApp.logoutPopup({ account: acct });
+      refreshUI();
+      setStatus('Signed out');
+    }
+
+    async function acquireToken() {
+      const acct = msalApp.getActiveAccount();
+      try {
+        return (await msalApp.acquireTokenSilent({ account: acct, scopes: config.scopes })).accessToken;
+      } catch {
+        return (await msalApp.acquireTokenPopup({ account: acct, scopes: config.scopes })).accessToken;
+      }
+    }
+
+    async function runScan() {
+      const token = await acquireToken();
+      setStatus('Running scan...');
+      const r = await fetch(`${API_BASE}/api/v1/scan-once`, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!r.ok) {
+        setStatus('Scan failed');
+        return;
+      }
+
+      const resp = await r.json();
+      const scanId = resp.scan_run_id;
+
+      const r2 = await fetch(`${API_BASE}/api/v1/scan-runs/` + scanId);
+      const data = await r2.json();
+      showResults(data);
+
+      document.getElementById('downloads').style.display = 'block';
+      document.getElementById('dlPdf').href = `${API_BASE}${resp.reports.pdf}`;
+      document.getElementById('dlCsv').href = `${API_BASE}${resp.reports.csv}`;
+      document.getElementById('dlJsonl').href = `${API_BASE}${resp.reports.jsonl}`;
+
+      setStatus('Done');
+    }
+
+    function showResults(data) {
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+
+      const order = { fail: 0, error: 1, not_detected: 2, pass: 3 };
+      const sev = { high: 0, medium: 1, low: 2 };
+      const rows = (data.results || []).slice().sort((a, b) =>
+        (order[a.status] ?? 9) - (order[b.status] ?? 9) || (sev[a.severity] ?? 9) - (sev[b.severity] ?? 9)
+      );
+
+      for (const r of rows) {
+        const tr = document.createElement('tr');
+        const statusClass = 'pill-' + (r.status || 'pass').replace(' ', '_');
+        const sevClass = 'pill-' + (r.severity || 'low');
+        tr.innerHTML = `
+          <td>${escapeHtml(r.category)}</td>
+          <td>${escapeHtml(r.title)}</td>
+          <td><span class="pill ${statusClass}">${escapeHtml(r.status)}</span></td>
+          <td><span class="pill ${sevClass}">${escapeHtml(r.severity)}</span></td>
+          <td>${escapeHtml(r.summary)}</td>
+          <td>${escapeHtml(r.remediation)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+      document.getElementById('resultsSection').style.display = 'block';
+    }
+
+    btnSignIn.onclick = () => signIn().catch(e => setStatus('Sign-in error: ' + e.message));
+    btnSignOut.onclick = () => signOut().catch(e => setStatus('Sign-out error: ' + e.message));
+    btnScan.onclick = () => runScan().catch(e => setStatus('Scan error: ' + e.message));
+
+    loadConfig();
+  </script>
+</body>
+</html>
+
