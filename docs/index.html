@@ -6,215 +6,94 @@
   <title>LockList Security — SOC2 Compliance for Microsoft 365</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070b14;
-      --bg-elevated: #0d1321;
-      --bg-card: #121a2d;
-      --border: rgba(255,255,255,0.06);
-      --text: #e8ecf4;
-      --text-muted: #8b95a8;
+      --bg: #0a0e1a;
+      --bg-elevated: #111827;
+      --bg-card: #1a1f2e;
+      --bg-card-hover: #1f2535;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-light: #d1d5db;
       --accent: #3b82f6;
-      --accent-dim: rgba(59, 130, 246, 0.15);
-      --success: #22c55e;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.3);
+      --success: #10b981;
       --warning: #f59e0b;
+      --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: 'Outfit', system-ui, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
 
-    /* Nav */
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Navigation */
     nav {
       position: fixed;
       top: 0; left: 0; right: 0;
-      padding: 1.25rem 2rem;
+      padding: 1.5rem 0;
+      background: rgba(10, 14, 26, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+    }
+    nav .container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
-      z-index: 100;
     }
-    nav .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    nav .links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
     nav a {
       color: var(--text-muted);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 500;
       transition: color 0.2s;
     }
     nav a:hover { color: var(--text); }
     nav .cta {
       background: var(--accent);
       color: white !important;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-weight: 500;
-  <title>LockList Security – M365 One-time Scan</title>
-
-  <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      margin: 28px;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.2s;
     }
-    .row { margin: 10px 0; }
-    button { padding: 10px 12px; cursor: pointer; }
-    .muted { color: #666; }
-    .bad { font-weight: 600; }
-    .grid {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 8px 12px;
-      max-width: 900px;
+    nav .cta:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 1100px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      font-size: 13px;
-      vertical-align: top;
-    }
-    th {
-      text-align: left;
-      background: #f7f7f7;
-    }
-    .pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid #ccc;
-      font-size: 12px;
-    }
-  </style>
 
-  <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
-</head>
-<body>
-
-<h1>LockList Security</h1>
-<p class="muted">
-  One-time Microsoft 365 security checkup. Sign in, run scan, download evidence.
-</p>
-
-<footer>
-  LockList Security  
-  Built by Vienna Wyler  
-  admin@locklistsecurity.com  
-  https://locklistsecurity.com
-</footer>
-
-<div class="row">
-  <button id="btnSignIn" disabled>Sign in to Microsoft 365</button>
-  <button id="btnSignOut" disabled>Sign out</button>
-  <button id="btnScan" disabled>Run one-time scan</button>
-</div>
-
-<div class="row grid">
-  <div class="muted">Signed in:</div><div id="signedIn" class="muted">No</div>
-  <div class="muted">Account:</div><div id="account" class="muted">–</div>
-  <div class="muted">Status:</div><div id="status" class="muted">Idle</div>
-</div>
-
-<div class="row" id="downloads" style="display:none;">
-  <h3>Downloads</h3>
-  <ul>
-    <li><a id="dlPdf" href="#">PDF report</a></li>
-    <li><a id="dlCsv" href="#">CSV results</a></li>
-    <li><a id="dlJsonl" href="#">JSONL evidence</a></li>
-  </ul>
-</div>
-
-<div class="row">
-  <h3>Results</h3>
-  <table id="resultsTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>Category</th>
-        <th>Check</th>
-        <th>Status</th>
-        <th>Severity</th>
-        <th>Summary</th>
-        <th>How to fix</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<script>
-  // ===============================
-  // CONFIG
-  // ===============================
-  const apiBase = "https://locklistsecurity.onrender.com";
-
-  let msalApp;
-  let config;
-
-  const elSignedIn = document.getElementById('signedIn');
-  const elAccount  = document.getElementById('account');
-  const elStatus   = document.getElementById('status');
-
-  const btnSignIn  = document.getElementById('btnSignIn');
-  const btnSignOut = document.getElementById('btnSignOut');
-  const btnScan    = document.getElementById('btnScan');
-
-  function setStatus(msg) {
-    elStatus.textContent = msg;
-  }
-
-  // ===============================
-  // LOAD CONFIG FROM BACKEND
-  // ===============================
-  async function loadConfig() {
-    try {
-      setStatus("Loading configuration...");
-      const r = await fetch(apiBase + "/api/v1/public-config");
-      if (!r.ok) {
-        throw new Error(`Config load failed (${r.status})`);
-      }
-
-      config = await r.json();
-
-      if (!config.clientId || !config.scopes || config.scopes.length === 0) {
-        setStatus("Server config invalid or missing AZURE_CLIENT_ID");
-        return;
-      }
-
-      msalApp = new msal.PublicClientApplication({
-        auth: {
-          clientId: config.clientId,
-          authority: config.authority,
-          redirectUri: window.location.origin + "/"
-        },
-        cache: { cacheLocation: "localStorage" }
-      });
-
-      const accounts = msalApp.getAllAccounts();
-      if (accounts.length) {
-        msalApp.setActiveAccount(accounts[0]);
-        refreshUI();
-      } else {
-        btnSignIn.disabled = false;
-        setStatus("Ready");
-      }
-    } catch (e) {
-      setStatus("Config error: " + e.message);
-    }
-  }
-
-    /* Hero */
+    /* Hero Section */
     .hero {
       min-height: 100vh;
       display: flex;
@@ -222,7 +101,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 6rem 2rem 4rem;
+      padding: 8rem 2rem 4rem;
       position: relative;
       overflow: hidden;
     }
@@ -231,87 +110,195 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 120%;
-      height: 120%;
-      background: radial-gradient(ellipse at center, var(--accent-dim) 0%, transparent 60%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
+      font-size: clamp(2.5rem, 7vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
       line-height: 1.1;
-      margin-bottom: 1rem;
-      max-width: 720px;
+      margin-bottom: 1.5rem;
+      max-width: 900px;
+      background: linear-gradient(135deg, #ffffff 0%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .hero .sub {
-      font-size: 1.2rem;
+    .hero .subtitle {
+      font-size: 1.35rem;
       color: var(--text-muted);
-      max-width: 540px;
-      margin-bottom: 2.5rem;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+    .hero .description {
+      font-size: 1.05rem;
+      color: var(--text-light);
+      max-width: 800px;
+      margin: 0 auto 3rem;
+      line-height: 1.8;
     }
     .hero .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       background: var(--accent);
       color: white;
-      padding: 0.9rem 1.75rem;
-      border-radius: 8px;
+      padding: 1rem 2rem;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 1.05rem;
       text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px var(--accent-glow);
     }
     .hero .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px var(--accent-glow);
+      background: var(--accent-hover);
     }
 
-    /* Sections */
-    section {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 5rem 2rem;
+    /* Feature Boxes */
+    .features {
+      padding: 6rem 0;
+      background: var(--bg-elevated);
     }
-    section h2 {
-      font-size: 1.75rem;
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .feature-card .icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .feature-card h3 {
+      font-size: 1.25rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
     }
-    section .lead {
+    .feature-card p {
       color: var(--text-muted);
-      font-size: 1.05rem;
-      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
     }
 
-    /* SOC2 Controls */
+    /* Section Headers */
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .section-header h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .section-header .lead {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* SOC2 Controls Section */
+    .controls {
+      padding: 6rem 0;
+    }
     .controls-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin-top: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
     }
     .control-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: border-color 0.2s;
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
     }
-    .control-card:hover { border-color: rgba(255,255,255,0.12); }
-    .control-card .cat {
+    .control-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .control-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .control-card:hover::before {
+      opacity: 1;
+    }
+    .control-card .category {
       font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       color: var(--accent);
-      margin-bottom: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
     }
-    .control-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .control-card p { font-size: 0.9rem; color: var(--text-muted); }
+    .control-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .control-card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
 
-    /* Technical Architecture */
+    /* Technical Section */
+    .technical {
+      padding: 6rem 0;
+      background: var(--bg-elevated);
+    }
+    .tech-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-top: 2rem;
+    }
     .tech-stack {
       display: flex;
       flex-wrap: wrap;
@@ -321,320 +308,382 @@
     .tech-item {
       background: var(--bg-elevated);
       border: 1px solid var(--border);
-      padding: 0.75rem 1.25rem;
-      border-radius: 8px;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
       font-size: 0.9rem;
+      transition: all 0.2s;
     }
-    .tech-item .label { color: var(--text-muted); font-size: 0.8rem; }
-    .flow-diagram {
-      background: var(--bg-card);
+    .tech-item:hover {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .tech-item .label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      display: block;
+    }
+    .flow-box {
+      background: var(--bg-elevated);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 2rem;
       margin: 2rem 0;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      line-height: 1.8;
+      font-size: 0.9rem;
+      line-height: 2;
       color: var(--text-muted);
       overflow-x: auto;
     }
-    .flow-diagram .hl { color: var(--accent); }
-    .flow-diagram .muted { color: var(--text-muted); opacity: 0.7; }
-
-    /* Graph API Permissions */
+    .flow-box .hl { color: var(--accent); font-weight: 500; }
+    .flow-box .muted { opacity: 0.6; }
+    .perms-box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
     .perms-list {
       list-style: none;
       margin-top: 1rem;
     }
     .perms-list li {
       display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.6rem 0;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
       border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
     .perms-list li:last-child { border-bottom: none; }
-    .perms-list .scope { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+    .perms-list .scope {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-weight: 500;
+      min-width: 200px;
+    }
+    .perms-list .desc {
+      color: var(--text-muted);
+      flex: 1;
+    }
 
-    /* CTA */
+    /* CTA Section */
     .cta-section {
+      padding: 6rem 0;
       text-align: center;
-      padding: 5rem 2rem;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+    .cta-section .lead {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
     }
     .cta-section .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       background: var(--accent);
       color: white;
-      padding: 0.9rem 1.75rem;
-      border-radius: 8px;
+      padding: 1rem 2rem;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: 1.05rem;
       text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px var(--accent-glow);
     }
     .cta-section .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
-  function refreshUI() {
-    const acct = msalApp?.getActiveAccount();
-    const signedIn = !!acct;
-
-    elSignedIn.textContent = signedIn ? "Yes" : "No";
-    elAccount.textContent = signedIn ? (acct.username || "") : "–";
-
-    btnSignIn.disabled  = signedIn;
-    btnSignOut.disabled = !signedIn;
-    btnScan.disabled    = !signedIn;
-  }
-
-  async function signIn() {
-    setStatus("Signing in...");
-    const resp = await msalApp.loginPopup({
-      scopes: config.scopes,
-      prompt: "select_account"
-    });
-    msalApp.setActiveAccount(resp.account);
-    refreshUI();
-    setStatus("Signed in");
-  }
-
-  async function signOut() {
-    const acct = msalApp.getActiveAccount();
-    if (!acct) return;
-    await msalApp.logoutPopup({ account: acct });
-    refreshUI();
-    setStatus("Signed out");
-  }
-
-  async function acquireToken() {
-    const acct = msalApp.getActiveAccount();
-    if (!acct) throw new Error("Not signed in");
-
-    try {
-      const resp = await msalApp.acquireTokenSilent({
-        account: acct,
-        scopes: config.scopes
-      });
-      return resp.accessToken;
-    } catch {
-      const resp = await msalApp.acquireTokenPopup({
-        account: acct,
-        scopes: config.scopes
-      });
-      return resp.accessToken;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px var(--accent-glow);
+      background: var(--accent-hover);
     }
-  }
 
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, c =>
-      ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])
-    );
-  }
-
+    /* Footer */
     footer {
       text-align: center;
-      padding: 2rem;
+      padding: 3rem 2rem;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       border-top: 1px solid var(--border);
-  function showResults(data) {
-    const table = document.getElementById("resultsTable");
-    const tbody = table.querySelector("tbody");
-    tbody.innerHTML = "";
+      background: var(--bg-elevated);
+    }
 
-    const rows = data.results || [];
-    for (const r of rows) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${escapeHtml(r.category)}</td>
-        <td>${escapeHtml(r.title)}</td>
-        <td><span class="pill ${r.status !== "pass" ? "bad" : ""}">${escapeHtml(r.status)}</span></td>
-        <td><span class="pill">${escapeHtml(r.severity)}</span></td>
-        <td>${escapeHtml(r.summary)}</td>
-        <td>${escapeHtml(r.remediation)}</td>
-      `;
-      tbody.appendChild(tr);
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav .links { gap: 1rem; }
+      nav .links a:not(.cta) { display: none; }
+      .hero { padding: 6rem 1rem 3rem; }
+      .features-grid, .controls-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <nav>
-    <span class="logo">LockList Security</span>
-    <div style="display: flex; gap: 2rem; align-items: center;">
-      <a href="#compliance">SOC2 Controls</a>
-      <a href="#technical">Technical</a>
-      <a href="scan.html" class="cta">Run Scan</a>
+    <div class="container">
+      <a href="/" class="logo">LockList Security</a>
+      <div class="links">
+        <a href="#features">Features</a>
+        <a href="#compliance">SOC2 Controls</a>
+        <a href="#technical">Technical</a>
+        <a href="scan.html" class="cta">Run Scan</a>
+      </div>
     </div>
   </nav>
 
   <header class="hero">
-    <h1>SOC2 Compliance for Microsoft 365 Organizations</h1>
-    <p class="sub">Automated security assessments for Entra ID, Conditional Access, and audit controls. Evidence-ready reports for auditors.</p>
-    <a href="scan.html" class="btn">Run Security Scan →</a>
+    <div class="container">
+      <h1>SOC2 Compliance for Microsoft 365</h1>
+      <p class="subtitle">Automated security assessments for Entra ID, Conditional Access, and audit controls</p>
+      <p class="description">
+        LockList Security provides comprehensive, evidence-ready security assessments for Microsoft 365 tenants. 
+        Our platform evaluates your Entra ID configuration, Conditional Access policies, and monitoring controls 
+        against SOC2 Trust Service Criteria. Generate auditor-ready reports in minutes, not weeks.
+      </p>
+      <a href="scan.html" class="btn">Run Security Scan →</a>
+    </div>
   </header>
 
-  <section id="compliance">
-    <h2>SOC2 Control Coverage</h2>
-    <p class="lead">Our scan evaluates Microsoft 365 tenant configurations against SOC2 Trust Service Criteria. Each check maps to identity, access, and monitoring requirements.</p>
-
-    <div class="controls-grid">
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>MFA for Admin Roles</h3>
-        <p>Conditional Access policies targeting privileged roles must require MFA. We verify policies exist, are enabled, and include MFA in grant controls.</p>
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Why LockList Security?</h2>
+        <p class="lead">Enterprise-grade security assessment tools designed for compliance teams and auditors</p>
       </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>MFA for All Users</h3>
-        <p>Organization-wide MFA enforcement via Conditional Access. We check for policies that include all users and require MFA before granting access.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>Block Legacy Authentication</h3>
-        <p>Legacy protocols (basic auth, IMAP, POP) bypass MFA. We detect policies that block "Other clients" and legacy client types.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>Privileged Role Assignments</h3>
-        <p>Inventory of directory role assignments. Excessive assignments (>10) flag potential over-provisioning. PIM and least privilege recommended.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>Directory Roles & Membership</h3>
-        <p>Audit of Entra ID directory roles and member counts. Ensures visibility into who holds Global Admin, Privileged Role Admin, and other sensitive roles.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>MFA Registration Coverage</h3>
-        <p>Percentage of users with MFA methods registered. Target ≥95%. We pull from the authentication methods user registration report.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC6.1 — Logical Access</span>
-        <h3>Per-User Auth Methods</h3>
-        <p>Sample of authentication methods per user. Validates strong methods (Authenticator, FIDO2) for admins and high-risk accounts.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC7.4 — Monitoring</span>
-        <h3>Sign-In Logs</h3>
-        <p>Access to sign-in logs via Microsoft Graph. Required for detecting failed logins, legacy client usage, and anomalous access patterns.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC7.4 — Monitoring</span>
-        <h3>Directory Audit Logs</h3>
-        <p>Directory audit logs capture admin actions: role changes, app consent, user modifications. Essential for change management evidence.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">CC7.4 — Monitoring</span>
-        <h3>Applied CA Policies in Logs</h3>
-        <p>Sign-in logs include appliedConditionalAccessPolicies. Confirms policy evaluation visibility for audit trail completeness.</p>
-      </div>
-      <div class="control-card">
-        <span class="cat">General</span>
-        <h3>Tenant Licensing</h3>
-        <p>Subscribed SKUs explain feature availability. Conditional Access requires Entra ID P1/P2; Security Defaults available on free tier.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <h3>Zero Token Storage</h3>
+          <p>Your Microsoft 365 access tokens never leave your browser. We use delegated authentication—you sign in, we scan, you get results. No persistent access, no security risk.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h3>Evidence-Ready Reports</h3>
+          <p>Download comprehensive reports in PDF, CSV, and JSONL formats. Each scan includes raw evidence from Microsoft Graph API, perfect for auditor verification and compliance documentation.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>One-Time Scans</h3>
+          <p>No ongoing monitoring, no data retention. Run assessments on-demand when you need them. Perfect for pre-audit preparation, compliance reviews, and security assessments.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎯</div>
+          <h3>SOC2 Mapped Controls</h3>
+          <p>Every security check maps directly to SOC2 Trust Service Criteria. Understand exactly which controls you're meeting and where gaps exist, with clear remediation guidance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔍</div>
+          <h3>Comprehensive Coverage</h3>
+          <p>Assess 11 critical security areas: MFA enforcement, legacy auth blocking, privileged access, directory roles, audit logging, and more. All evaluated against industry standards.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🛡️</div>
+          <h3>Read-Only Operations</h3>
+          <p>Our scans use read-only Microsoft Graph API permissions. We never modify your tenant configuration—we only assess and report on your current security posture.</p>
+        </div>
       </div>
     </div>
   </section>
-    table.style.display = "";
-  }
 
-  async function runScan() {
-    try {
-      setStatus("Getting token...");
-      const token = await acquireToken();
-
-      setStatus("Running scan...");
-      const r = await fetch(apiBase + "/api/v1/scan-once", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json"
-        }
-      });
-
-      if (!r.ok) {
-        const t = await r.text();
-        throw new Error(t);
-      }
-
-  <section id="technical">
-    <h2>Technical Architecture</h2>
-    <p class="lead">Delegated access via Microsoft Graph. No token storage. Evidence exported as PDF, CSV, and JSONL for auditor review.</p>
-
-    <div class="tech-stack">
-      <div class="tech-item"><span class="label">Auth</span><br>MSAL.js + Entra ID</div>
-      <div class="tech-item"><span class="label">API</span><br>Microsoft Graph (delegated)</div>
-      <div class="tech-item"><span class="label">Backend</span><br>FastAPI + Python</div>
-      <div class="tech-item"><span class="label">Evidence</span><br>PDF / CSV / JSONL</div>
+  <section class="controls" id="compliance">
+    <div class="container">
+      <div class="section-header">
+        <h2>SOC2 Control Coverage</h2>
+        <p class="lead">Our security scan evaluates your Microsoft 365 tenant against SOC2 Trust Service Criteria</p>
+      </div>
+      <div class="controls-grid">
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>MFA for Admin Roles</h3>
+          <p>Verifies that Conditional Access policies exist and are enabled for privileged roles. Checks that MFA is required in grant controls and that policies target admin role assignments. Critical for preventing unauthorized administrative access.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>MFA for All Users</h3>
+          <p>Evaluates organization-wide MFA enforcement through Conditional Access. Confirms policies include all users and require MFA before granting access to cloud applications. Ensures comprehensive protection across your entire tenant.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>Block Legacy Authentication</h3>
+          <p>Detects policies that block legacy authentication protocols (basic auth, IMAP, POP). Legacy protocols bypass MFA and modern security controls, making them a significant attack vector. We verify blocking policies are in place.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>Privileged Role Assignments</h3>
+          <p>Inventories all directory role assignments in your tenant. Flags excessive assignments (>10) as potential over-provisioning. Recommends Privileged Identity Management (PIM) and least privilege principles for better access control.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>Directory Roles & Membership</h3>
+          <p>Audits Entra ID directory roles and member counts. Provides visibility into who holds sensitive roles like Global Admin, Privileged Role Admin, and Security Admin. Essential for access governance and compliance.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>MFA Registration Coverage</h3>
+          <p>Calculates the percentage of users with MFA methods registered. Target is ≥95% coverage. Pulls data from Microsoft's authentication methods user registration report to provide accurate metrics.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC6.1 — Logical Access</div>
+          <h3>Per-User Auth Methods</h3>
+          <p>Samples authentication methods registered per user. Validates that admins and high-risk accounts use strong methods like Microsoft Authenticator or FIDO2 security keys, not weaker SMS or phone-based MFA.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC7.4 — Monitoring</div>
+          <h3>Sign-In Logs</h3>
+          <p>Verifies access to sign-in logs via Microsoft Graph API. These logs are essential for detecting failed login attempts, legacy client usage, anomalous access patterns, and potential security incidents.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC7.4 — Monitoring</div>
+          <h3>Directory Audit Logs</h3>
+          <p>Confirms access to directory audit logs that capture administrative actions. Logs include role changes, app consent grants, user modifications, and other critical changes. Required for change management evidence.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">CC7.4 — Monitoring</div>
+          <h3>Applied CA Policies in Logs</h3>
+          <p>Validates that sign-in logs include appliedConditionalAccessPolicies field. This confirms policy evaluation visibility in your audit trail, essential for understanding why access was granted or denied.</p>
+        </div>
+        <div class="control-card">
+          <div class="category">General</div>
+          <h3>Tenant Licensing</h3>
+          <p>Retrieves subscribed SKUs to explain feature availability. Conditional Access requires Entra ID P1 or P2 licenses, while Security Defaults are available on the free tier. Helps understand control limitations.</p>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Token Flow</h3>
-    <div class="flow-diagram">
-<span class="muted"># User signs in with Microsoft 365 (Entra ID)</span>
-<span class="muted"># Browser obtains access token via MSAL.js — token never leaves client</span>
-<span class="muted"># User clicks "Run Scan" → token sent to backend for single request</span>
-<span class="muted"># Backend calls Microsoft Graph with delegated token</span>
+  <section class="technical" id="technical">
+    <div class="container">
+      <div class="section-header">
+        <h2>Technical Architecture</h2>
+        <p class="lead">Built on Microsoft Graph API with delegated authentication—secure, transparent, and evidence-ready</p>
+      </div>
+      
+      <div class="tech-box">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Technology Stack</h3>
+        <div class="tech-stack">
+          <div class="tech-item">
+            <span class="label">Authentication</span>
+            <div style="margin-top: 0.25rem; color: var(--text);">MSAL.js + Entra ID</div>
+          </div>
+          <div class="tech-item">
+            <span class="label">API</span>
+            <div style="margin-top: 0.25rem; color: var(--text);">Microsoft Graph (delegated)</div>
+          </div>
+          <div class="tech-item">
+            <span class="label">Backend</span>
+            <div style="margin-top: 0.25rem; color: var(--text);">FastAPI + Python</div>
+          </div>
+          <div class="tech-item">
+            <span class="label">Evidence</span>
+            <div style="margin-top: 0.25rem; color: var(--text);">PDF / CSV / JSONL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tech-box">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Authentication Flow</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.7;">
+          LockList Security uses delegated authentication—your browser obtains an access token directly from Microsoft, 
+          and we use it for a single scan request. Tokens are never stored on our servers.
+        </p>
+        <div class="flow-box">
+<span class="muted"># Step 1: User signs in with Microsoft 365 (Entra ID)</span>
+<span class="muted"># Step 2: Browser obtains access token via MSAL.js — token stays in browser</span>
+<span class="muted"># Step 3: User clicks "Run Scan" → token sent to backend for single request</span>
+<span class="muted"># Step 4: Backend calls Microsoft Graph API with delegated token</span>
 <br>
-<span class="hl">User</span> → MSAL.js → <span class="hl">Access Token</span> → Backend → <span class="hl">Microsoft Graph</span>
+<span class="hl">User</span> → MSAL.js → <span class="hl">Access Token</span> → Backend → <span class="hl">Microsoft Graph API</span>
 <br>
-<span class="muted"># Graph endpoints called: /identity/conditionalAccess/policies, /auditLogs/signIns,</span>
-<span class="muted"># /roleManagement/directory/roleAssignments, /reports/authenticationMethods/..., etc.</span>
+<span class="muted"># Graph endpoints: /identity/conditionalAccess/policies, /auditLogs/signIns,</span>
+<span class="muted"># /roleManagement/directory/roleAssignments, /reports/authenticationMethods/...</span>
+        </div>
+      </div>
+
+      <div class="tech-box">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Microsoft Graph Permissions</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.7;">
+          All permissions are delegated (user context) and read-only. Admin consent is required. 
+          We never request write permissions or application-level access.
+        </p>
+        <div class="perms-box">
+          <ul class="perms-list">
+            <li>
+              <span class="scope">AuditLog.Read.All</span>
+              <span class="desc">Access to sign-in logs and directory audit logs for security monitoring and compliance evidence</span>
+            </li>
+            <li>
+              <span class="scope">Directory.Read.All</span>
+              <span class="desc">Read users, directory roles, and group memberships to assess access governance</span>
+            </li>
+            <li>
+              <span class="scope">Policy.Read.All</span>
+              <span class="desc">Read Conditional Access policies to evaluate MFA and authentication controls</span>
+            </li>
+            <li>
+              <span class="scope">RoleManagement.Read.Directory</span>
+              <span class="desc">Read role assignments to inventory privileged access and identify over-provisioning</span>
+            </li>
+            <li>
+              <span class="scope">UserAuthenticationMethod.Read.All</span>
+              <span class="desc">Read MFA registration status and authentication methods per user</span>
+            </li>
+            <li>
+              <span class="scope">Organization.Read.All</span>
+              <span class="desc">Read tenant information and subscribed SKUs to understand feature availability</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tech-box">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Evidence & Reports</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.7;">
+          Each scan produces downloadable artifacts suitable for SOC2 audit documentation and compliance reviews.
+        </p>
+        <div class="perms-box">
+          <ul class="perms-list">
+            <li>
+              <strong style="color: var(--text);">PDF Report</strong>
+              <span class="desc">Formatted summary with pass/fail status, severity ratings, detailed summaries, and step-by-step remediation guidance. Perfect for executive summaries and auditor presentations.</span>
+            </li>
+            <li>
+              <strong style="color: var(--text);">CSV Results</strong>
+              <span class="desc">Tabular data export for spreadsheet analysis, tracking changes over time, and integration with compliance management tools.</span>
+            </li>
+            <li>
+              <strong style="color: var(--text);">JSONL Evidence</strong>
+              <span class="desc">Machine-readable evidence with raw Microsoft Graph API responses. Includes policy configurations, role assignments, and audit log samples for auditor verification.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
-
-    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Microsoft Graph Permissions (Delegated)</h3>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Admin consent required. Scoped to read-only operations.</p>
-    <ul class="perms-list">
-      <li><span class="scope">AuditLog.Read.All</span> — Sign-in and directory audit logs</li>
-      <li><span class="scope">Directory.Read.All</span> — Users, roles, memberships</li>
-      <li><span class="scope">Policy.Read.All</span> — Conditional Access policies</li>
-      <li><span class="scope">RoleManagement.Read.Directory</span> — Role assignments</li>
-      <li><span class="scope">UserAuthenticationMethod.Read.All</span> — MFA registration, auth methods</li>
-      <li><span class="scope">Organization.Read.All</span> — Tenant info, subscribed SKUs</li>
-    </ul>
-
-    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Evidence & Reports</h3>
-    <p style="color: var(--text-muted); font-size: 0.95rem;">Each scan produces downloadable artifacts suitable for SOC2 audit documentation.</p>
-    <ul class="perms-list">
-      <li><strong>PDF Report</strong> — Formatted summary with pass/fail status, severity, and remediation steps</li>
-      <li><strong>CSV Results</strong> — Tabular data for spreadsheet analysis and tracking</li>
-      <li><strong>JSONL Evidence</strong> — Machine-readable evidence with raw Graph API responses for auditor verification</li>
-    </ul>
   </section>
 
   <section class="cta-section">
-    <h2 style="margin-bottom: 0.5rem;">Ready to Assess Your Tenant?</h2>
-    <p class="lead" style="margin-bottom: 1.5rem;">Sign in with a Microsoft 365 admin account and run a one-time scan.</p>
-    <a href="scan.html" class="btn">Run Security Scan →</a>
+    <div class="container">
+      <h2>Ready to Assess Your Tenant?</h2>
+      <p class="lead">Sign in with a Microsoft 365 admin account and run a comprehensive security scan in minutes</p>
+      <a href="scan.html" class="btn">Run Security Scan →</a>
+    </div>
   </section>
 
   <footer>
-    LockList Security — SOC2 compliance assessments for Microsoft 365
+    <div class="container">
+      <p>LockList Security — SOC2 compliance assessments for Microsoft 365 organizations</p>
+      <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Built by Vienna Wyler • admin@locklistsecurity.com</p>
+    </div>
   </footer>
-      const r2 = await fetch(apiBase + "/api/v1/scan-runs/" + scanId);
-      const data = await r2.json();
-
-      showResults(data);
-
-      document.getElementById("downloads").style.display = "";
-      document.getElementById("dlPdf").href   = apiBase + resp.reports.pdf;
-      document.getElementById("dlCsv").href   = apiBase + resp.reports.csv;
-      document.getElementById("dlJsonl").href = apiBase + resp.reports.jsonl;
-
-      setStatus("Done");
-    } catch (e) {
-      setStatus("Scan failed: " + e.message);
-    }
-  }
-
-  btnSignIn.onclick  = () => signIn();
-  btnSignOut.onclick = () => signOut();
-  btnScan.onclick    = () => runScan();
-
-  loadConfig();
-</script>
-
 </body>
 </html>
