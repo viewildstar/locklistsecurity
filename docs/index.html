@@ -1,8 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LockList Security — SOC2 Compliance for Microsoft 365</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --bg-elevated: #0d1321;
+      --bg-card: #121a2d;
+      --border: rgba(255,255,255,0.06);
+      --text: #e8ecf4;
+      --text-muted: #8b95a8;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59, 130, 246, 0.15);
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.9em; }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+      z-index: 100;
+    }
+    nav .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+    nav .cta {
+      background: var(--accent);
+      color: white !important;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
   <title>LockList Security – M365 One-time Scan</title>
 
   <style>
@@ -159,6 +214,170 @@
     }
   }
 
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(ellipse at center, var(--accent-dim) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      max-width: 720px;
+    }
+    .hero .sub {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+    }
+    .hero .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: white;
+      padding: 0.9rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
+    }
+
+    /* Sections */
+    section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    section h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    section .lead {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* SOC2 Controls */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    .control-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .control-card:hover { border-color: rgba(255,255,255,0.12); }
+    .control-card .cat {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .control-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .control-card p { font-size: 0.9rem; color: var(--text-muted); }
+
+    /* Technical Architecture */
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .tech-item {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .tech-item .label { color: var(--text-muted); font-size: 0.8rem; }
+    .flow-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+    .flow-diagram .hl { color: var(--accent); }
+    .flow-diagram .muted { color: var(--text-muted); opacity: 0.7; }
+
+    /* Graph API Permissions */
+    .perms-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+    .perms-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .perms-list li:last-child { border-bottom: none; }
+    .perms-list .scope { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+    /* CTA */
+    .cta-section {
+      text-align: center;
+      padding: 5rem 2rem;
+    }
+    .cta-section .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent);
+      color: white;
+      padding: 0.9rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-section .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
   function refreshUI() {
     const acct = msalApp?.getActiveAccount();
     const signedIn = !!acct;
@@ -215,6 +434,12 @@
     );
   }
 
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
   function showResults(data) {
     const table = document.getElementById("resultsTable");
     const tbody = table.querySelector("tbody");
@@ -233,7 +458,86 @@
       `;
       tbody.appendChild(tr);
     }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="logo">LockList Security</span>
+    <div style="display: flex; gap: 2rem; align-items: center;">
+      <a href="#compliance">SOC2 Controls</a>
+      <a href="#technical">Technical</a>
+      <a href="scan.html" class="cta">Run Scan</a>
+    </div>
+  </nav>
 
+  <header class="hero">
+    <h1>SOC2 Compliance for Microsoft 365 Organizations</h1>
+    <p class="sub">Automated security assessments for Entra ID, Conditional Access, and audit controls. Evidence-ready reports for auditors.</p>
+    <a href="scan.html" class="btn">Run Security Scan →</a>
+  </header>
+
+  <section id="compliance">
+    <h2>SOC2 Control Coverage</h2>
+    <p class="lead">Our scan evaluates Microsoft 365 tenant configurations against SOC2 Trust Service Criteria. Each check maps to identity, access, and monitoring requirements.</p>
+
+    <div class="controls-grid">
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>MFA for Admin Roles</h3>
+        <p>Conditional Access policies targeting privileged roles must require MFA. We verify policies exist, are enabled, and include MFA in grant controls.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>MFA for All Users</h3>
+        <p>Organization-wide MFA enforcement via Conditional Access. We check for policies that include all users and require MFA before granting access.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>Block Legacy Authentication</h3>
+        <p>Legacy protocols (basic auth, IMAP, POP) bypass MFA. We detect policies that block "Other clients" and legacy client types.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>Privileged Role Assignments</h3>
+        <p>Inventory of directory role assignments. Excessive assignments (>10) flag potential over-provisioning. PIM and least privilege recommended.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>Directory Roles & Membership</h3>
+        <p>Audit of Entra ID directory roles and member counts. Ensures visibility into who holds Global Admin, Privileged Role Admin, and other sensitive roles.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>MFA Registration Coverage</h3>
+        <p>Percentage of users with MFA methods registered. Target ≥95%. We pull from the authentication methods user registration report.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC6.1 — Logical Access</span>
+        <h3>Per-User Auth Methods</h3>
+        <p>Sample of authentication methods per user. Validates strong methods (Authenticator, FIDO2) for admins and high-risk accounts.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC7.4 — Monitoring</span>
+        <h3>Sign-In Logs</h3>
+        <p>Access to sign-in logs via Microsoft Graph. Required for detecting failed logins, legacy client usage, and anomalous access patterns.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC7.4 — Monitoring</span>
+        <h3>Directory Audit Logs</h3>
+        <p>Directory audit logs capture admin actions: role changes, app consent, user modifications. Essential for change management evidence.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">CC7.4 — Monitoring</span>
+        <h3>Applied CA Policies in Logs</h3>
+        <p>Sign-in logs include appliedConditionalAccessPolicies. Confirms policy evaluation visibility for audit trail completeness.</p>
+      </div>
+      <div class="control-card">
+        <span class="cat">General</span>
+        <h3>Tenant Licensing</h3>
+        <p>Subscribed SKUs explain feature availability. Conditional Access requires Entra ID P1/P2; Security Defaults available on free tier.</p>
+      </div>
+    </div>
+  </section>
     table.style.display = "";
   }
 
@@ -256,9 +560,59 @@
         throw new Error(t);
       }
 
-      const resp = await r.json();
-      const scanId = resp.scan_run_id;
+  <section id="technical">
+    <h2>Technical Architecture</h2>
+    <p class="lead">Delegated access via Microsoft Graph. No token storage. Evidence exported as PDF, CSV, and JSONL for auditor review.</p>
 
+    <div class="tech-stack">
+      <div class="tech-item"><span class="label">Auth</span><br>MSAL.js + Entra ID</div>
+      <div class="tech-item"><span class="label">API</span><br>Microsoft Graph (delegated)</div>
+      <div class="tech-item"><span class="label">Backend</span><br>FastAPI + Python</div>
+      <div class="tech-item"><span class="label">Evidence</span><br>PDF / CSV / JSONL</div>
+    </div>
+
+    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Token Flow</h3>
+    <div class="flow-diagram">
+<span class="muted"># User signs in with Microsoft 365 (Entra ID)</span>
+<span class="muted"># Browser obtains access token via MSAL.js — token never leaves client</span>
+<span class="muted"># User clicks "Run Scan" → token sent to backend for single request</span>
+<span class="muted"># Backend calls Microsoft Graph with delegated token</span>
+<br>
+<span class="hl">User</span> → MSAL.js → <span class="hl">Access Token</span> → Backend → <span class="hl">Microsoft Graph</span>
+<br>
+<span class="muted"># Graph endpoints called: /identity/conditionalAccess/policies, /auditLogs/signIns,</span>
+<span class="muted"># /roleManagement/directory/roleAssignments, /reports/authenticationMethods/..., etc.</span>
+    </div>
+
+    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Microsoft Graph Permissions (Delegated)</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Admin consent required. Scoped to read-only operations.</p>
+    <ul class="perms-list">
+      <li><span class="scope">AuditLog.Read.All</span> — Sign-in and directory audit logs</li>
+      <li><span class="scope">Directory.Read.All</span> — Users, roles, memberships</li>
+      <li><span class="scope">Policy.Read.All</span> — Conditional Access policies</li>
+      <li><span class="scope">RoleManagement.Read.Directory</span> — Role assignments</li>
+      <li><span class="scope">UserAuthenticationMethod.Read.All</span> — MFA registration, auth methods</li>
+      <li><span class="scope">Organization.Read.All</span> — Tenant info, subscribed SKUs</li>
+    </ul>
+
+    <h3 style="font-size: 1.1rem; margin-top: 2rem; margin-bottom: 0.75rem;">Evidence & Reports</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Each scan produces downloadable artifacts suitable for SOC2 audit documentation.</p>
+    <ul class="perms-list">
+      <li><strong>PDF Report</strong> — Formatted summary with pass/fail status, severity, and remediation steps</li>
+      <li><strong>CSV Results</strong> — Tabular data for spreadsheet analysis and tracking</li>
+      <li><strong>JSONL Evidence</strong> — Machine-readable evidence with raw Graph API responses for auditor verification</li>
+    </ul>
+  </section>
+
+  <section class="cta-section">
+    <h2 style="margin-bottom: 0.5rem;">Ready to Assess Your Tenant?</h2>
+    <p class="lead" style="margin-bottom: 1.5rem;">Sign in with a Microsoft 365 admin account and run a one-time scan.</p>
+    <a href="scan.html" class="btn">Run Security Scan →</a>
+  </section>
+
+  <footer>
+    LockList Security — SOC2 compliance assessments for Microsoft 365
+  </footer>
       const r2 = await fetch(apiBase + "/api/v1/scan-runs/" + scanId);
       const data = await r2.json();
 

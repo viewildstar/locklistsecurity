@@ -13,7 +13,7 @@ Create an App Registration in Azure (Entra ID) and configure:
 
 1) **Supported account types**: "Accounts in any organizational directory" (multi‑tenant) is easiest.
 2) **Authentication**:
-   - Add a **SPA** redirect URI: `http://localhost:8000/`
+   - Add **SPA** redirect URIs: `http://localhost:8000/`, `https://locklistsecurity.com/`, `https://locklistsecurity.com/scan.html`
    - Enable "Access tokens" and "ID tokens" (implicit/hybrid is OK for local dev)
 3) **API permissions (Delegated)** (admin consent required for most):
    - `AuditLog.Read.All`
